@@ -1,0 +1,65 @@
+// Function to hash passwords
+function hashPassword(password, salt) {
+    const crypto = require("crypto");
+    const hash = crypto.createHash("sha256");
+    hash.update(password + salt);
+    return hash.digest("hex").toUpperCase();
+}
+
+// Configuration
+const salt = "YOUR_SALT_HERE";
+const password = "YOUR_ADMIN_PASSWORD";
+const hashedPassword = hashPassword(password, salt);
+
+/********** Masking for Customer collection **********/
+db.Customer.updateMany({}, [
+    {
+        $set: {
+            AdminComment: null,
+            Email: {
+                $concat: ["user", { $toString: { $floor: { $multiply: [{ $rand: {} }, 10000] } } }, "@example.com"]
+            },
+            LastIpAddress: "0.0.0.0",
+            Password: "masked_password",
+            PasswordSalt: "masked_salt",
+            Username: {
+                $concat: ["user", { $toString: { $floor: { $multiply: [{ $rand: {} }, 1000] } } }]
+            }
+        }
+    }
+]);
+
+/********** Insert dev admin user **********/
+db.Customer.insertOne({
+    Email: "admin@example.com",
+    Password: hashedPassword,
+    PasswordSalt: salt,
+    Username: "admin",
+    UserFields: [
+        {
+            Key: "FirstName",
+            Value: "Admin",
+            StoreId: ""
+        },
+        {
+            Key: "LastName",
+            Value: "User",
+            StoreId: ""
+        }
+    ],
+    // Add other required fields here
+});
+
+/********** Masking for UserApi collection **********/
+db.UserApi.updateMany({}, [
+    {
+        $set: {
+            Email: {
+                $concat: ["api", { $toString: { $floor: { $multiply: [{ $rand: {} }, 10000] } } }, "@example.com"]
+            },
+            Password: "masked_password",
+            PrivateKey: "masked_key",
+            Token: "masked_token"
+        }
+    }
+]);
