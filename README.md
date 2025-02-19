@@ -63,9 +63,11 @@ The main script provides two options:
 ├── assets/
 │   ├── data/           # GrandNode configuration files
 │   └── images/         # Image assets
+│       ├── thumbs/     # Thumbnail images
+│       └── uploaded/   # Uploaded images
 ├── mongodb/
 │   ├── dumps/          # MongoDB database dumps
-│   └── mask/           # Masking configuration
+│   └── mask/           # Masking process files
 ├── .env                # Environment configuration
 ├── masking_logic.js    # MongoDB data masking rules
 └── script.sh           # Main setup script
