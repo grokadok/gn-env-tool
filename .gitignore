@@ -15,11 +15,11 @@
 !/mongodb/mask/
 /mongodb/mask/*
 
-# Ignore environment files
-*.env
-*.archive
+# Handle file types
 !*.yml
 !*.sh
+*.archive
+*.env
 *.json
 *.js
 

@@ -4,11 +4,12 @@ A development environment setup for GrandNode with MongoDB data masking capabili
 
 ## Prerequisites
 
+-   Git
 -   Docker and Docker Compose
--   .NET SDK
+-   .NET SDK according to project
 -   Node.js and npm
 -   MongoDB Tools (mongosh, mongorestore)
--   a .Net capable IDE (Visual Studio, Rider)
+-   A .Net capable IDE (Visual Studio, Rider)
 
 ## Setup
 
@@ -27,9 +28,8 @@ A development environment setup for GrandNode with MongoDB data masking capabili
 3. Prepare required assets:
 
     - Place MongoDB dump in `mongodb/dumps`, as an .archive file or a folder named after the database
-    - Add configuration files:
+    - Add configuration file:
         - `assets/data/InstalledPlugins.cfg`
-        - `assets/data/Settings.cfg`
     - (Optional) Add images in `assets/images/uploaded`
 
 4. For data masking:

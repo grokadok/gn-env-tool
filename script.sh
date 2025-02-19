@@ -1,7 +1,6 @@
 #!/bin/sh
 echo "### Starting the build process"
 
-# check for required assets
 echo "### Checking for required assets"
 if [ ! -f .env ]; then
     echo "### Missing .env file, please create one, see .env.example"
@@ -19,8 +18,8 @@ if [ ! -d ./mongodb/dumps/${MONGO_DB} ] && [ ! -f ./mongodb/dumps/${MONGO_DB}.ar
     echo "### Missing MongoDB dump"
     exit 1
 fi
-if [ ! -f ./assets/data/InstalledPlugins.cfg ] || [ ! -f ./assets/data/Settings.cfg ]; then
-    echo "### Missing ./assets/data/InstalledPlugins.cfg & ./assets/data/Settings.cfg configuration files"
+if [ ! -f ./assets/data/InstalledPlugins.cfg ]; then
+    echo "### Missing ./assets/data/InstalledPlugins.cfg configuration file"
     exit 1
 fi
 if [ ! -d ./assets/images/uploaded ]; then
@@ -32,12 +31,16 @@ if [ ! -d ./assets/images/uploaded ]; then
     fi
 fi
 
-# Load environment variables from .env file
-if [ -f .env ]; then
-    export $(cat .env | sed 's/#.*//g' | xargs)
-fi
+echo "### Loading environment variables"
+export $(cat .env | sed 's/#.*//g' | xargs)
 
-# create mongo .env files
+echo "### Creating configuration files"
+cat > ./assets/data/Settings.cfg << EOF
+{
+  "ConnectionString": "mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}",
+  "DbProvider": 0
+}
+EOF
 cat > ./mongodb/.env << EOF
 MONGO_INITDB_ROOT_USERNAME: root
 MONGO_INITDB_ROOT_PASSWORD: password
@@ -98,7 +101,6 @@ do
   sleep 2
 done
 
-# if parameter --mask is passed, restore the masked data, otherwise restore the original data
 if [ -f ./dumps/masked.archive ]; then
   echo "### Restoring masked MongoDB data"
   mongorestore mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB} --archive=./dumps/masked.archive
