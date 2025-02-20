@@ -18,7 +18,7 @@ fi
 echo "Masking data..."
 echo "use ${MONGO_DB}
 db.auth('${MONGO_USER}', '${MONGO_PASSWORD}');
-${MASKING_LOGIC}" | mongosh
+$(cat masking_logic.js)" | mongosh
 
 # Dump the masked database to a new archive file
 echo "Creating dump of masked database..."

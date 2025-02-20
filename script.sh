@@ -55,7 +55,6 @@ cat > ./mongodb/mask/.env << EOF
 MONGO_DB=${MONGO_DB}
 MONGO_USER=${MONGO_USER}
 MONGO_PASSWORD=${MONGO_PASSWORD}
-MASKING_LOGIC='$(cat ./masking_logic.js)'
 EOF
 
 echo "### Stoping MongoDB"

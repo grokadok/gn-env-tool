@@ -8,3 +8,4 @@ services:
             - ../data:/data/db
             - ../dumps:/dump
             - ./init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+            - ../../masking_logic.js:/masking_logic.js:ro
