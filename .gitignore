@@ -4,9 +4,10 @@
 # Keep the root directory files
 !/*.*
 
-# But keep these directories
+# Handle directories
 !/assets/
 !/assets/data/
+!/assets/data/*
 !/assets/images/
 !/mongodb/
 /mongodb/*
@@ -18,9 +19,9 @@
 # Handle file types
 !*.yml
 !*.sh
+!*.example
 *.archive
 *.env
-*.json
 *.js
 
 # OS generated files

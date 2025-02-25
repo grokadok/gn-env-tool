@@ -57,8 +57,9 @@ MONGO_USER=${MONGO_USER}
 MONGO_PASSWORD=${MONGO_PASSWORD}
 EOF
 
-echo "### Stoping MongoDB"
-cd ./mongodb && docker compose down && cd ./mask && docker compose down && cd ../..
+echo "### Stoping and cleaning MongoDB"
+cd ./mongodb && rm -f ./dumps/masked.archive && docker compose down && cd ./mask && docker compose down && cd ../..
+
 
 for arg in "$@"; do
     if [ "$arg" = "--clone" ]; then
@@ -77,6 +78,8 @@ for arg in "$@"; do
         echo "### Copying configuration files"
         cp ./assets/data/InstalledPlugins.cfg ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg
         cp ./assets/data/Settings.cfg ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg
+        cp ./assets/data/appsettings.json ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json
+        cp ./assets/data/Program.cs ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs
 
         # if images assets, copy them
         if [ -d ./assets/images/uploaded ]; then

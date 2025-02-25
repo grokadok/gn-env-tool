@@ -29,6 +29,20 @@ db.Customer.updateMany({}, [
     }
 ]);
 
+/********** Masking for UserApi collection **********/
+db.UserApi.updateMany({}, [
+    {
+        $set: {
+            Email: {
+                $concat: ["api", { $toString: { $floor: { $multiply: [{ $rand: {} }, 10000] } } }, "@example.com"]
+            },
+            Password: "masked_password",
+            PrivateKey: "masked_key",
+            Token: "masked_token"
+        }
+    }
+]);
+
 /********** Insert dev admin user **********/
 db.Customer.insertOne({
     Email: "admin@example.com",
@@ -49,17 +63,3 @@ db.Customer.insertOne({
     ],
     // Add other required fields here
 });
-
-/********** Masking for UserApi collection **********/
-db.UserApi.updateMany({}, [
-    {
-        $set: {
-            Email: {
-                $concat: ["api", { $toString: { $floor: { $multiply: [{ $rand: {} }, 10000] } } }, "@example.com"]
-            },
-            Password: "masked_password",
-            PrivateKey: "masked_key",
-            Token: "masked_token"
-        }
-    }
-]);
