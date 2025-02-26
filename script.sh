@@ -67,10 +67,39 @@ for arg in "$@"; do
         rm -rf ./${GIT_REPO_NAME}
 
         echo "### Cloning GrandNode repository"
+
         git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME}
+        if [ $? -ne 0 ]; then
+            if [ -z ${GIT_WORKING_COMMIT+x} ]; then
+                echo "### Clone failed and no working commit provided"
+                exit 1
+            fi
+            echo "### Clone failed, cleaning up the workspace"
+            rm -rf ./${GIT_REPO_NAME}
+            echo "### Cloning GrandNode repository with the last working commit"
+            git clone ${GIT_REPO}/${GIT_REPO_NAME}
+            echo "### Checking out to the target commit"
+            cd ./${GIT_REPO_NAME}
+            git checkout ${GIT_WORKING_COMMIT}
+            echo "### Initializing and updating submodules"
+            git submodule init
+            git submodule update
+            cd ..
+        fi
+        # if clone fails, exit
+        if [ $? -ne 0 ]; then
+            echo "### Clone failed"
+            exit 1
+        fi
 
         echo "### Building GrandNode"
         dotnet build ./${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
+
+        # if build fails, exit
+        if [ $? -ne 0 ]; then
+            echo "### Build failed"
+            exit 1
+        fi
 
         echo "### Installing GrandNode dependencies"
         npm install --prefix ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}
