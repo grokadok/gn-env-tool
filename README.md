@@ -5,9 +5,10 @@
 This is a development environment for GrandNode that:
 
 -   Automates the entire setup process including repository cloning, building, and dependency installation
--   Allows connections via both localhost:port and IP:port
--   Provides comprehensive logging of all requests and responses
 -   Features MongoDB data masking capabilities for secure development with production-like data
+-   Runs MongoDB from a provided dump file or folder
+-   Provides comprehensive logging of all requests and responses
+-   Allows connections via both localhost:port and IP:port
 
 ## Prerequisites
 
