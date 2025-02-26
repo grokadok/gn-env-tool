@@ -8,7 +8,9 @@ This is a development environment for GrandNode that:
 -   Features MongoDB data masking capabilities for secure development with production-like data
 -   Runs MongoDB from a provided dump file or folder
 -   Provides comprehensive logging of all requests and responses
--   Allows connections via both localhost:port and IP:port
+-   Supports multiple connection methods: localhost:port, IP address:port, or any host pointing to the local network
+-   Creates an admin account with credentials devadmin:devadmin
+-   Sends emails to a [maildev](http://localhost:1080) instance accessible at http://localhost:1080
 
 ## Prerequisites
 
