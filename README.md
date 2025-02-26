@@ -27,19 +27,18 @@ A development environment setup for GrandNode with MongoDB data masking capabili
 
     ### Environment Variables
 
-    | Variable                  | Description                              | Example                                          |
-    | ------------------------- | ---------------------------------------- | ------------------------------------------------ |
-    | `MONGO_USER`              | MongoDB username                         | user                                             |
-    | `MONGO_PASSWORD`          | MongoDB password                         | password                                         |
-    | `MONGO_HOST`              | MongoDB server hostname                  | localhost                                        |
-    | `MONGO_PORT`              | MongoDB server port                      | 27017                                            |
-    | `MONGO_DB`                | MongoDB database name                    | grandnode                                        |
-    | `GIT_REPO`                | Git repository URL                       | https://username@dev.azure.com/org/project/\_git |
-    | `GIT_REPO_NAME`           | Repository name/folder                   | ProjectName.GrandNode                            |
-    | `GIT_WORKING_COMMIT`      | Fallback commit hash if main clone fails | 3d65bd034145c1a8cc668deef259c7c08ad89615         |
-    | `GRANDNODE_PROJECT_PATH`  | Path to solution file                    | GrandNode.sln                                    |
-    | `GRANDNODE_WEB_PATH`      | Path to web application                  | src/Web/Grand.Web                                |
-    | `GRANDNODE_SOLUTION_PATH` | Path to solution file (for IDE opening)  | GrandNode.sln                                    |
+    | Variable                 | Description                              | Example                                  |
+    | ------------------------ | ---------------------------------------- | ---------------------------------------- |
+    | `MONGO_USER`             | MongoDB username                         | user                                     |
+    | `MONGO_PASSWORD`         | MongoDB password                         | password                                 |
+    | `MONGO_HOST`             | MongoDB server hostname                  | localhost                                |
+    | `MONGO_PORT`             | MongoDB server port                      | 27017                                    |
+    | `MONGO_DB`               | MongoDB database name                    | grandnode                                |
+    | `GIT_REPO`               | Git repository URL                       | git@ssh.dev.azure.com:v3/org/project     |
+    | `GIT_REPO_NAME`          | Repository name/folder                   | ProjectName.GrandNode                    |
+    | `GIT_WORKING_COMMIT`     | Fallback commit hash if main clone fails | 3d65bd034145c1a8cc668deef259c7c08ad89615 |
+    | `GRANDNODE_PROJECT_PATH` | Path to solution file                    | GrandNode.sln                            |
+    | `GRANDNODE_WEB_PATH`     | Path to web application                  | src/Web/Grand.Web                        |
 
 3. Prepare required assets:
 
