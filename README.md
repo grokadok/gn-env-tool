@@ -1,6 +1,13 @@
 # GrandNode Development Environment
 
-A development environment setup for GrandNode with MongoDB data masking capabilities.
+## Overview
+
+This is a development environment for GrandNode that:
+
+-   Automates the entire setup process including repository cloning, building, and dependency installation
+-   Allows connections via both localhost:port and IP:port
+-   Provides comprehensive logging of all requests and responses
+-   Features MongoDB data masking capabilities for secure development with production-like data
 
 ## Prerequisites
 
@@ -19,7 +26,7 @@ A development environment setup for GrandNode with MongoDB data masking capabili
     cp .env.example .env
     ```
 
-2. Configure your [.env](http://_vscodecontentref_/1) file with:
+2. Configure your .env file with:
 
     - MongoDB details
     - Git repository details
@@ -94,3 +101,4 @@ The main script provides two options:
 -   Masked data is saved as `dumps/masked.archive`
 -   The script checks for all required assets before running
 -   Image assets are optional with prompt to continue without them
+-   If clone fails, it will try to clone the last working commit if provided
