@@ -39,11 +39,17 @@ This is a development environment for GrandNode that:
 
     | Variable                 | Description                              | Example                                  |
     | ------------------------ | ---------------------------------------- | ---------------------------------------- |
+    | `GN_ADMIN_USER`          | GrandNode admin username                 | admin                                    |
+    | `GN_ADMIN_PASSWORD`      | GrandNode admin password                 | password                                 |
     | `MONGO_USER`             | MongoDB username                         | user                                     |
     | `MONGO_PASSWORD`         | MongoDB password                         | password                                 |
     | `MONGO_HOST`             | MongoDB server hostname                  | localhost                                |
     | `MONGO_PORT`             | MongoDB server port                      | 27017                                    |
     | `MONGO_DB`               | MongoDB database name                    | grandnode                                |
+    | `MAILDEV_INCOMING_USER`  | Maildev username                         | user                                     |
+    | `MAILDEV_INCOMING_PASS`  | Maildev password                         | password                                 |
+    | `MAILDEV_WEB_HOST`       | Maildev web port                         | 1080                                     |
+    | `MAILDEV_SMTP_HOST`      | Maildev smtp port                        | 1025                                     |
     | `GIT_REPO`               | Git repository URL                       | git@ssh.dev.azure.com:v3/org/project     |
     | `GIT_REPO_NAME`          | Repository name/folder                   | ProjectName.GrandNode                    |
     | `GIT_WORKING_COMMIT`     | Fallback commit hash if main clone fails | 3d65bd034145c1a8cc668deef259c7c08ad89615 |

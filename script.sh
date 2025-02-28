@@ -73,8 +73,8 @@ for arg in "$@"; do
 
         echo "### Cloning GrandNode repository"
 
-        git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME}
-        if [ $? -ne 0 ]; then
+        # git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME}
+        # if [ $? -ne 0 ]; then
             if [ -z ${GIT_WORKING_COMMIT+x} ]; then
                 echo "### Clone failed and no working commit provided"
                 exit 1
@@ -90,7 +90,7 @@ for arg in "$@"; do
             git submodule init
             git submodule update
             cd ..
-        fi
+        # fi
         # if clone fails, exit
         if [ $? -ne 0 ]; then
             echo "### Clone failed"
@@ -164,7 +164,7 @@ mongosh mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${
         }
 
         const salt = 'salty123'; // You can use any string as salt
-        const password = 'devadmin';
+        const password = '${GN_ADMIN_PASSWORD}';
         const hashedPassword = hashPassword(password, salt);
         /********** Insert dev admin user **********/
         db.Customer.insertOne({
@@ -241,19 +241,19 @@ mongosh mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${
                     StoreId: '',
                 },
             ],
-            Username: 'devadmin',
+            Username: '${GN_ADMIN_USER}',
             VendorId: null,
         });
         /********** Insert dev email account and set it as default **********/
         const emailAccountId = ObjectId().toString();
         db.EmailAccount.insertOne({
             '_id': emailAccountId,
-            'DisplayName': 'Email test account', 
+            'DisplayName': '${GIT_REPO_NAME} mailer', 
             'Email': 'noreply@test.dev', 
             'Host': 'localhost', 
-            'Port': 1025, 
-            'Username': 'dev', 
-            'Password': 'dev', 
+            'Port': ${MAILDEV_SMTP_PORT}, 
+            'Username': '${MAILDEV_INCOMING_USER}', 
+            'Password': '${MAILDEV_INCOMING_PASS}', 
             'UseServerCertificateValidation': false, 
             'SecureSocketOptionsId': 0, 
             'UserFields': []
@@ -265,7 +265,7 @@ mongosh mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${
     "
 
 echo "### Starting MailDev"
-docker run -p 1080:1080 -p 1025:1025 -d -e MAILDEV_INCOMING_USER=dev -e MAILDEV_INCOMING_PASS=dev maildev/maildev
+docker run -p ${MAILDEV_WEB_PORT}:1080 -p ${MAILDEV_SMTP_PORT}:1025 -d -e MAILDEV_INCOMING_USER=${MAILDEV_INCOMING_USER} -e MAILDEV_INCOMING_PASS=${MAILDEV_INCOMING_PASS} maildev/maildev
 
 
 # echo "### Opening GrandNode solution"
