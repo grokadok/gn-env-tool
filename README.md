@@ -121,3 +121,14 @@ The main script provides two options:
 -   The script checks for all required assets before running
 -   Image assets are optional with prompt to continue without them
 -   If clone fails, it will try to clone the last working commit if provided
+
+## Known Issues
+
+-   **Windows Line Endings**: Scripts may fail on Windows if cloned without the `--config core.autocrlf=false` flag due to line ending conversion issues.
+-   **.NET SDK Version Compatibility**: On Windows, if the project is not compatible with .NET SDK 9 and later, Visual Studio may force installation of .NET SDK 9, causing build failures. A solution to force the build to use a specific SDK major version is being investigated.
+-   **MongoDB Connection Failures**: If MongoDB fails to connect, check your firewall settings and ensure the ports specified in `.env` are available.
+-   **Image Asset Permissions**: On Linux/macOS, ensure the `assets/images` directories have proper read/write permissions.
+-   **Git SSH Authentication**: When using SSH URLs for `GIT_REPO`, ensure your SSH keys are properly configured with the source repository.
+-   **Data Masking Performance**: Masking large databases may take significant time and resources.
+
+If you encounter any issues not listed here, please submit them as GitHub issues.
