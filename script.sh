@@ -1,6 +1,24 @@
 #!/bin/sh
 echo "### Starting the build process"
 
+echo "### Checking for required tools"
+if ! command -v mongorestore &> /dev/null; then
+    echo "### Missing mongorestore tool, please install MongoDB Command Line Database Tools"
+    exit 1
+fi
+if ! command -v mongosh &> /dev/null; then
+    echo "### Missing mongosh tool, please install MongoDB Shell"
+    exit 1
+fi
+if ! command -v docker &> /dev/null; then
+    echo "### Missing docker tool, please install Docker"
+    exit 1
+fi
+if ! command -v npm &> /dev/null; then
+    echo "### Missing npm tool, please install Node.js"
+    exit 1
+fi
+
 echo "### Checking for required assets"
 if [ ! -f .env ]; then
     echo "### Missing .env file, please create one, see .env.example"
@@ -73,8 +91,8 @@ for arg in "$@"; do
 
         echo "### Cloning GrandNode repository"
 
-        # git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME}
-        # if [ $? -ne 0 ]; then
+        git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME}
+        if [ $? -ne 0 ]; then
             if [ -z ${GIT_WORKING_COMMIT+x} ]; then
                 echo "### Clone failed and no working commit provided"
                 exit 1
@@ -90,7 +108,7 @@ for arg in "$@"; do
             git submodule init
             git submodule update
             cd ..
-        # fi
+        fi
         # if clone fails, exit
         if [ $? -ne 0 ]; then
             echo "### Clone failed"
@@ -100,10 +118,37 @@ for arg in "$@"; do
         echo "### Building GrandNode"
         dotnet build ./${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
 
-        # if build fails, exit
+        # if build fails, handle the error
         if [ $? -ne 0 ]; then
             echo "### Build failed"
+            if [ -n "${GIT_WORKING_COMMIT+x}" ]; then
+            # Check if already on the working commit
+            CURRENT_COMMIT=$(cd ./${GIT_REPO_NAME} && git rev-parse HEAD)
+            if [ "$CURRENT_COMMIT" = "${GIT_WORKING_COMMIT}" ]; then
+                echo "### Already on the working commit (${GIT_WORKING_COMMIT}) and build still failed"
+                exit 1
+            else
+                read -p "### Do you want to try with the last working commit (${GIT_WORKING_COMMIT})? (y/n) " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo "### Checking out to the last working commit (${GIT_WORKING_COMMIT})"
+                cd ./${GIT_REPO_NAME}
+                git checkout ${GIT_WORKING_COMMIT}
+                cd ..
+                echo "### Rebuilding GrandNode with the last working commit"
+                dotnet build ./${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
+                if [ $? -ne 0 ]; then
+                    echo "### Build failed again with the last working commit"
+                    exit 1
+                fi
+                else
+                exit 1
+                fi
+            fi
+            else
+            echo "### No working commit provided (GIT_WORKING_COMMIT not set)"
             exit 1
+            fi
         fi
 
         echo "### Installing GrandNode dependencies"
@@ -153,122 +198,19 @@ else
   fi
 fi
 
-echo "### Adding dev admin user and configuring email settings"
-mongosh mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}\
-    --eval "
-        function hashPassword(password, salt) {
-            const crypto = require('crypto');
-            const hash = crypto.createHash('sha256');
-            hash.update(password + salt);
-            return hash.digest('hex').toUpperCase();
-        }
+cd ..
 
-        const salt = 'salty123'; // You can use any string as salt
-        const password = '${GN_ADMIN_PASSWORD}';
-        const hashedPassword = hashPassword(password, salt);
-        /********** Insert dev admin user **********/
-        db.Customer.insertOne({
-            _id: ObjectId().toString(),
-            Active: true,
-            Addresses: [],
-            AdminComment: null,
-            AffiliateId: null,
-            Attributes: [],
-            BillingAddress: null,
-            CannotLoginUntilDateUtc: null,
-            Coordinates: null,
-            CreatedOnUtc: new Date(),
-            CustomerGuid: UUID(),
-            CustomerTags: [],
-            Deleted: false,
-            Email: 'devadmin@example.com',
-            FailedLoginAttempts: 0,
-            FreeShipping: false,
-            Groups: [
-                '63ebc5f02e4bfb93ca449822',
-                '63ebc5f02e4bfb93ca449823',
-                '64c8b2dea8021148097c9de8',
-            ],
-            HasContributions: false,
-            IsSystemAccount: false,
-            IsTaxExempt: false,
-            LastActivityDateUtc: new Date(),
-            LastIpAddress: null,
-            LastLoginDateUtc: new Date(),
-            LastPurchaseDateUtc: null,
-            LastUpdateCartDateUtc: null,
-            LastUpdateWishListDateUtc: null,
-            OwnerId: '',
-            Password: hashedPassword,
-            PasswordChangeDateUtc: new Date(),
-            PasswordFormatId: 1,
-            PasswordSalt: salt,
-            SeId: '6527b31be262fc12f168af58',
-            ShippingAddress: null,
-            ShoppingCartItems: [],
-            StaffStoreId: null,
-            StoreId: null,
-            SystemName: null,
-            UserFields: [
-                {
-                    Key: 'FirstName',
-                    Value: 'devadmin',
-                    StoreId: '',
-                },
-                {
-                    Key: 'LastName',
-                    Value: 'devadmin',
-                    StoreId: '',
-                },
-                {
-                    Key: 'Gender',
-                    Value: null,
-                    StoreId: '',
-                },
-                {
-                    Key: 'Phone',
-                    Value: null,
-                    StoreId: '',
-                },
-                {
-                    Key: 'Fax',
-                    Value: null,
-                    StoreId: '',
-                },
-                {
-                    Key: 'PasswordToken',
-                    Value: null,
-                    StoreId: '',
-                },
-            ],
-            Username: '${GN_ADMIN_USER}',
-            VendorId: null,
-        });
-        /********** Insert dev email account and set it as default **********/
-        const emailAccountId = ObjectId().toString();
-        db.EmailAccount.insertOne({
-            '_id': emailAccountId,
-            'DisplayName': '${GIT_REPO_NAME} mailer', 
-            'Email': 'noreply@test.dev', 
-            'Host': 'localhost', 
-            'Port': ${MAILDEV_SMTP_PORT}, 
-            'Username': '${MAILDEV_INCOMING_USER}', 
-            'Password': '${MAILDEV_INCOMING_PASS}', 
-            'UseServerCertificateValidation': false, 
-            'SecureSocketOptionsId': 0, 
-            'UserFields': []
-        });
-        db.Setting.updateOne(
-            { 'Name': 'emailaccountsettings' }, 
-            { \$set: { 'Metadata': '{\"DefaultEmailAccountId\":\"' + emailAccountId + '\"}' } }
-        );
-    "
+echo "### Adding dev admin user and configuring email settings"
+# Running the MongoDB operations using an external JS file
+mongosh mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB} \
+  --eval "const process = {env: {GN_ADMIN_PASSWORD: '${GN_ADMIN_PASSWORD}', GN_ADMIN_USER: '${GN_ADMIN_USER}', GIT_REPO_NAME: '${GIT_REPO_NAME}', MAILDEV_SMTP_PORT: ${MAILDEV_SMTP_PORT}, MAILDEV_INCOMING_USER: '${MAILDEV_INCOMING_USER}', MAILDEV_INCOMING_PASS: '${MAILDEV_INCOMING_PASS}'}};" \
+  --file=db_setup.js
 
 echo "### Starting MailDev"
 docker run -p ${MAILDEV_WEB_PORT}:1080 -p ${MAILDEV_SMTP_PORT}:1025 -d -e MAILDEV_INCOMING_USER=${MAILDEV_INCOMING_USER} -e MAILDEV_INCOMING_PASS=${MAILDEV_INCOMING_PASS} maildev/maildev
 
 
 # echo "### Opening GrandNode solution"
-# cd ../${GIT_REPO_NAME} && open ${GRANDNODE_SOLUTION_PATH}
+# cd ./${GIT_REPO_NAME} && open ${GRANDNODE_SOLUTION_PATH}
 
 echo "### All done!"

@@ -1,0 +1,120 @@
+/**
+ * Example database setup script for GrandNode
+ * This file gets executed by mongosh to set up admin users and email configuration
+ */
+
+// Utility function to hash passwords in GrandNode format
+function hashPassword(password, salt) {
+    const crypto = require("crypto");
+    const hash = crypto.createHash("sha256");
+    hash.update(password + salt);
+    return hash.digest("hex").toUpperCase();
+}
+
+// Password hashing
+// In the actual execution, salt should be randomly generated for security
+const salt = "EXAMPLE_SALT_VALUE"; // Example salt, will be replaced with actual value
+const password = process.env.GN_ADMIN_PASSWORD || "example_password"; // Fallback for example only
+const hashedPassword = hashPassword(password, salt);
+
+// Create admin user in the database
+// This inserts a development admin user with full privileges
+db.Customer.insertOne({
+    _id: ObjectId().toString(),
+    Active: true,
+    Addresses: [],
+    AdminComment: null,
+    AffiliateId: null,
+    Attributes: [],
+    BillingAddress: null,
+    CannotLoginUntilDateUtc: null,
+    Coordinates: null,
+    CreatedOnUtc: new Date(),
+    CustomerGuid: UUID(), // Generates a unique identifier
+    CustomerTags: [],
+    Deleted: false,
+    Email: "devadmin@example.com", // Example email - update for your environment
+    FailedLoginAttempts: 0,
+    FreeShipping: false,
+    // Admin user groups - these IDs represent Admin, Forum Moderators, and Registered
+    // You may need to update these based on your actual database
+    Groups: [
+        ObjectId().toString(), // Example Admin group ID
+    ],
+    HasContributions: false,
+    IsSystemAccount: false,
+    IsTaxExempt: false,
+    LastActivityDateUtc: new Date(),
+    LastIpAddress: null,
+    LastLoginDateUtc: new Date(),
+    LastPurchaseDateUtc: null,
+    LastUpdateCartDateUtc: null,
+    LastUpdateWishListDateUtc: null,
+    OwnerId: "",
+    Password: hashedPassword,
+    PasswordChangeDateUtc: new Date(),
+    PasswordFormatId: 1,
+    PasswordSalt: salt,
+    SeId: "6527b31be262fc12f168af58", // Example store employee ID
+    ShippingAddress: null,
+    ShoppingCartItems: [],
+    StaffStoreId: null,
+    StoreId: null,
+    SystemName: null,
+    UserFields: [
+        { Key: "FirstName", Value: "Dev", StoreId: "" },
+        { Key: "LastName", Value: "Admin", StoreId: "" },
+        { Key: "Gender", Value: null, StoreId: "" },
+        { Key: "Phone", Value: null, StoreId: "" },
+        { Key: "Fax", Value: null, StoreId: "" },
+        { Key: "PasswordToken", Value: null, StoreId: "" },
+    ],
+    Username: process.env.GN_ADMIN_USER || "devadmin", // Fallback for example only
+    VendorId: null,
+});
+
+// Configure email settings
+// This sets up the email system to use a local SMTP server (like MailDev)
+const emailAccountId = ObjectId().toString();
+db.EmailAccount.insertOne({
+    _id: emailAccountId,
+    DisplayName: "GrandNode Test Mailer", // Example display name
+    Email: "noreply@example.com", // Example email address
+    Host: "localhost", // Local SMTP server host
+    Port: 1025, // Default MailDev SMTP port (use process.env.MAILDEV_SMTP_PORT in real setup)
+    Username: "user", // Example username (use process.env.MAILDEV_INCOMING_USER in real setup)
+    Password: "pass", // Example password (use process.env.MAILDEV_INCOMING_PASS in real setup)
+    UseServerCertificateValidation: false,
+    SecureSocketOptionsId: 0, // No SSL
+    UserFields: [],
+});
+
+// Set the newly created email account as the default
+db.Setting.updateOne(
+    { Name: "emailaccountsettings" },
+    { $set: { Metadata: '{"DefaultEmailAccountId":"' + emailAccountId + '"}' } }
+);
+
+// Additional examples of other possible configurations:
+
+// Example: Update store information
+/*
+db.Store.updateOne(
+    { _id: "YOUR_STORE_ID" },
+    { 
+        $set: { 
+            Name: "Example Store",
+            Url: "http://localhost:4000",
+            SslEnabled: false
+        } 
+    }
+);
+*/
+
+// Example: Set default currency
+/*
+db.Setting.updateOne(
+    { Name: "currencysettings" },
+    { $set: { Metadata: '{"PrimaryStoreCurrencyId":"YOUR_CURRENCY_ID"}' } }
+);
+*/

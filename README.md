@@ -18,18 +18,26 @@ This is a development environment for GrandNode that:
 -   Docker and Docker Compose
 -   .NET SDK according to project
 -   Node.js and npm
--   MongoDB Tools (mongosh, mongorestore)
+-   MongoDB Tools (MongoDB Shell, MongoDB Command Line Database tools)
 -   A .Net capable IDE (Visual Studio, Rider)
 
 ## Setup
 
-1. Copy the environment file:
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/grokadok/gn-env-tool.git --config core.autocrlf=false
+    ```
+
+    > **Note for Windows users**: Adding `--config core.autocrlf=false` to your git clone command prevents line ending issues with shell scripts.
+
+2. Copy the environment file:
 
     ```bash
     cp .env.example .env
     ```
 
-2. Configure your .env file with:
+3. Configure your .env file with:
 
     - MongoDB details
     - Git repository details
@@ -56,14 +64,14 @@ This is a development environment for GrandNode that:
     | `GRANDNODE_PROJECT_PATH` | Path to solution file                    | GrandNode.sln                            |
     | `GRANDNODE_WEB_PATH`     | Path to web application                  | src/Web/Grand.Web                        |
 
-3. Prepare required assets:
+4. Prepare required assets:
 
     - Place MongoDB dump in `mongodb/dumps`, as an .archive file or a folder named after the database
     - Edit configuration file if needed:
         - `assets/data/InstalledPlugins.cfg`
     - (Optional) Add images in `assets/images/uploaded`
 
-4. For data masking:
+5. For data masking:
     ```bash
     cp masking_logic.js.example masking_logic.js
     ```
@@ -101,7 +109,9 @@ The main script provides two options:
 │   └── mask/           # Masking process files
 ├── .env                # Environment configuration
 ├── masking_logic.js    # MongoDB data masking rules
-└── script.sh           # Main setup script
+├── db_setup.js         # MongoDB accounts and Maildev setup
+├── script.bat          # Main setup script (batch)
+└── script.sh           # Main setup script (shell)
 ```
 
 ## Notes
