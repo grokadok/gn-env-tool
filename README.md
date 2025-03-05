@@ -130,5 +130,3 @@ The main script provides two options:
 -   **Image Asset Permissions**: On Linux/macOS, ensure the `assets/images` directories have proper read/write permissions.
 -   **Git SSH Authentication**: When using SSH URLs for `GIT_REPO`, ensure your SSH keys are properly configured with the source repository.
 -   **Data Masking Performance**: Masking large databases may take significant time and resources.
-
-If you encounter any issues not listed here, please submit them as GitHub issues.

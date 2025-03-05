@@ -130,5 +130,3 @@ Le script principal offre deux options :
 -   **Permissions des ressources d'images**: Sur Linux/macOS, assurez-vous que les répertoires `assets/images` ont les permissions de lecture/écriture appropriées.
 -   **Authentification SSH Git**: Lors de l'utilisation d'URLs SSH pour `GIT_REPO`, assurez-vous que vos clés SSH sont correctement configurées avec le dépôt source.
 -   **Performance du masquage des données**: Le masquage de grandes bases de données peut prendre beaucoup de temps et de ressources.
-
-Si vous rencontrez des problèmes non répertoriés ici, veuillez les soumettre en tant que problèmes GitHub.

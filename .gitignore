@@ -8,6 +8,7 @@
 !/assets/
 !/assets/data/
 !/assets/data/*
+/assets/data/Settings.cfg
 !/assets/images/
 !/mongodb/
 /mongodb/*
