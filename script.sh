@@ -2,6 +2,10 @@
 echo "### Starting the build process"
 
 echo "### Checking for required tools"
+if ! command -v git &> /dev/null; then
+    echo "### Missing git tool, please install Git"
+    exit 1
+fi
 if ! command -v mongorestore &> /dev/null; then
     echo "### Missing mongorestore tool, please install MongoDB Command Line Database Tools"
     exit 1
@@ -18,8 +22,22 @@ if ! command -v npm &> /dev/null; then
     echo "### Missing npm tool, please install Node.js"
     exit 1
 fi
+if ! command -v dotnet &> /dev/null; then
+    echo "### Missing dotnet tool, please install .NET SDK"
+    exit 1
+fi
+if ! dotnet dev-certs https --check; then
+    echo "### Installing the HTTPS development certificate"
+    dotnet dev-certs https --trust
+    if [ $? -ne 0 ]; then
+        echo "### Certificate installation failed, please install and trust the certificate manually"
+    fi
+fi
 
 echo "### Checking for required assets"
+if [ ! -d ./solution ]; then
+    mkdir ./solution
+fi
 if [ ! -f .env ]; then
     echo "### Missing .env file, please create one, see .env.example"
     exit 1
@@ -87,27 +105,27 @@ fi
 for arg in "$@"; do
     if [ "$arg" = "--clone" ]; then
         echo "### Cleaning up the workspace"
-        rm -rf ./${GIT_REPO_NAME}
+        rm -rf ./solution/${GIT_REPO_NAME}
 
         echo "### Cloning GrandNode repository"
 
-        git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME}
+        git clone --recurse-submodules ${GIT_REPO}/${GIT_REPO_NAME} ./solution/${GIT_REPO_NAME}
         if [ $? -ne 0 ]; then
             if [ -z ${GIT_WORKING_COMMIT+x} ]; then
                 echo "### Clone failed and no working commit provided"
                 exit 1
             fi
             echo "### Clone failed, cleaning up the workspace"
-            rm -rf ./${GIT_REPO_NAME}
+            rm -rf ./solution/${GIT_REPO_NAME}
             echo "### Cloning GrandNode repository with the last working commit"
-            git clone ${GIT_REPO}/${GIT_REPO_NAME}
+            git clone ${GIT_REPO}/${GIT_REPO_NAME} ./solution/${GIT_REPO_NAME}
             echo "### Checking out to the target commit"
-            cd ./${GIT_REPO_NAME}
+            cd ./solution/${GIT_REPO_NAME}
             git checkout ${GIT_WORKING_COMMIT}
             echo "### Initializing and updating submodules"
             git submodule init
             git submodule update
-            cd ..
+            cd ../..
         fi
         # if clone fails, exit
         if [ $? -ne 0 ]; then
@@ -116,14 +134,14 @@ for arg in "$@"; do
         fi
 
         echo "### Building GrandNode"
-        dotnet build ./${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
+        dotnet build ./solution/${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
 
         # if build fails, handle the error
         if [ $? -ne 0 ]; then
             echo "### Build failed"
             if [ -n "${GIT_WORKING_COMMIT+x}" ]; then
             # Check if already on the working commit
-            CURRENT_COMMIT=$(cd ./${GIT_REPO_NAME} && git rev-parse HEAD)
+            CURRENT_COMMIT=$(cd ./solution/${GIT_REPO_NAME} && git rev-parse HEAD)
             if [ "$CURRENT_COMMIT" = "${GIT_WORKING_COMMIT}" ]; then
                 echo "### Already on the working commit (${GIT_WORKING_COMMIT}) and build still failed"
                 exit 1
@@ -132,11 +150,11 @@ for arg in "$@"; do
                 echo
                 if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo "### Checking out to the last working commit (${GIT_WORKING_COMMIT})"
-                cd ./${GIT_REPO_NAME}
+                cd ./solution/${GIT_REPO_NAME}
                 git checkout ${GIT_WORKING_COMMIT}
-                cd ..
+                cd ../..
                 echo "### Rebuilding GrandNode with the last working commit"
-                dotnet build ./${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
+                dotnet build ./solution/${GIT_REPO_NAME}/${GRANDNODE_PROJECT_PATH}
                 if [ $? -ne 0 ]; then
                     echo "### Build failed again with the last working commit"
                     exit 1
@@ -152,23 +170,23 @@ for arg in "$@"; do
         fi
 
         echo "### Installing GrandNode dependencies"
-        npm install --prefix ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}
+        npm install --prefix ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}
 
         echo "### Copying configuration files"
-        mv ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg.bak
-        mv ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg.bak
-        mv ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json.bak
-        mv ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs.bak
-        cp ./assets/data/InstalledPlugins.cfg ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg
-        cp ./assets/data/Settings.cfg ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg
-        cp ./assets/data/appsettings.json ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json
-        cp ./assets/data/Program.cs ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs
+        mv ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg.bak
+        mv ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg.bak
+        mv ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json.bak
+        mv ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs.bak
+        cp ./assets/data/InstalledPlugins.cfg ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/InstalledPlugins.cfg
+        cp ./assets/data/Settings.cfg ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/Settings.cfg
+        cp ./assets/data/appsettings.json ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/App_Data/appsettings.json
+        cp ./assets/data/Program.cs ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/Program.cs
 
         # if images assets, copy them
         if [ -d ./assets/images/uploaded ]; then
             echo "### Copying image assets"
-            cp -r ./assets/images/uploaded/* ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/wwwroot/assets/images/uploaded
-            cp -r ./assets/images/thumbs/* ./${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/wwwroot/assets/images/thumbs
+            cp -r ./assets/images/uploaded/* ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/wwwroot/assets/images/uploaded
+            cp -r ./assets/images/thumbs/* ./solution/${GIT_REPO_NAME}/${GRANDNODE_WEB_PATH}/wwwroot/assets/images/thumbs
         fi
     elif [ "$arg" = "--mask" ]; then
         echo "### Masking MongoDB data"

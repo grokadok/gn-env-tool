@@ -16,11 +16,14 @@
 /mongodb/dumps/*
 !/mongodb/mask/
 /mongodb/mask/*
+!/solution
+/solution/*
 
 # Handle file types
 !*.yml
 !*.sh
 !*.example
+*.bak
 *.archive
 *.env
 *.js
