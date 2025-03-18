@@ -221,7 +221,7 @@ cd ..
 echo "### Adding dev admin user and configuring email settings"
 # Running the MongoDB operations using an external JS file
 mongosh mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB} \
-  --eval "const process = {env: {GN_ADMIN_PASSWORD: '${GN_ADMIN_PASSWORD}', GN_ADMIN_USER: '${GN_ADMIN_USER}', GIT_REPO_NAME: '${GIT_REPO_NAME}', MAILDEV_SMTP_PORT: ${MAILDEV_SMTP_PORT}, MAILDEV_INCOMING_USER: '${MAILDEV_INCOMING_USER}', MAILDEV_INCOMING_PASS: '${MAILDEV_INCOMING_PASS}'}};" \
+  --eval "const process = {env: {GN_USER_PASSWORD: '${GN_USER_PASSWORD}', GN_USER_USERNAME: '${GN_USER_USERNAME}', GN_USER_EMAIL: '${GN_USER_EMAIL}', GN_ADMIN_EMAIL: '${GN_ADMIN_EMAIL}', GN_ADMIN_PASSWORD: '${GN_ADMIN_PASSWORD}', GN_ADMIN_USERNAME: '${GN_ADMIN_USERNAME}',GN_STORES_NAMES: '${GN_STORES_NAMES}', GN_STORES_HOSTS: '${GN_STORES_HOSTS}', GN_STORES_PORTS: '${GN_STORES_PORTS}', GIT_REPO_NAME: '${GIT_REPO_NAME}', MAILDEV_SMTP_PORT: ${MAILDEV_SMTP_PORT}, MAILDEV_INCOMING_USER: '${MAILDEV_INCOMING_USER}', MAILDEV_INCOMING_PASS: '${MAILDEV_INCOMING_PASS}'}};" \
   --file=db_setup.js
 
 echo "### Starting MailDev"
@@ -229,6 +229,6 @@ docker run -p ${MAILDEV_WEB_PORT}:1080 -p ${MAILDEV_SMTP_PORT}:1025 -d -e MAILDE
 
 
 # echo "### Opening GrandNode solution"
-# cd ./${GIT_REPO_NAME} && open ${GRANDNODE_SOLUTION_PATH}
+# cd ./solution/${GIT_REPO_NAME} && open ${GRANDNODE_SOLUTION_PATH}
 
 echo "### All done!"

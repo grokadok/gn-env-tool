@@ -41,6 +41,10 @@ if %ERRORLEVEL% NEQ 0 (
     dotnet dev-certs https --trust
     if %ERRORLEVEL% NEQ 0 (
         echo ### Certificate installation failed, please install and trust the certificate manually
+        set /p REPLY="### Continue? (y/n) "
+        if /i not "!REPLY!"=="y" (
+            exit /b 1
+        )
     )
 )
 
@@ -248,7 +252,7 @@ if exist .\mongodb\dumps\masked.archive (
 )
 
 echo ### Adding dev admin user and configuring email settings
-mongosh mongodb://%MONGO_USER%:%MONGO_PASSWORD%@%MONGO_HOST%:%MONGO_PORT%/%MONGO_DB% --eval "const process = {env: {GN_ADMIN_PASSWORD: '%GN_ADMIN_PASSWORD%', GN_ADMIN_USER: '%GN_ADMIN_USER%', GIT_REPO_NAME: '%GIT_REPO_NAME%', MAILDEV_SMTP_PORT: '%MAILDEV_SMTP_PORT%', MAILDEV_INCOMING_USER: '%MAILDEV_INCOMING_USER%', MAILDEV_INCOMING_PASS: '%MAILDEV_INCOMING_PASS%'}};" --file=db_setup.js
+mongosh mongodb://%MONGO_USER%:%MONGO_PASSWORD%@%MONGO_HOST%:%MONGO_PORT%/%MONGO_DB% --eval "const process = {env: {GN_USER_PASSWORD: '%GN_USER_PASSWORD%', GN_USER_USERNAME: '%GN_USER_USER%', GN_USER_EMAIL: '%GN_USER_EMAIL%', GN_ADMIN_EMAIL: '%GN_ADMIN_EMAIL%', GN_ADMIN_PASSWORD: '%GN_ADMIN_PASSWORD%', GN_ADMIN_USERNAME: '%GN_ADMIN_USER%', GN_STORES_NAMES: '%GN_STORES_NAMES%', GN_STORES_HOSTS: '%GN_STORES_HOSTS%', GN_STORES_PORTS: '%GN_STORES_PORTS%', GIT_REPO_NAME: '%GIT_REPO_NAME%', MAILDEV_SMTP_PORT: %MAILDEV_SMTP_PORT%, MAILDEV_INCOMING_USER: '%MAILDEV_INCOMING_USER%', MAILDEV_INCOMING_PASS: '%MAILDEV_INCOMING_PASS%'}};" --file=db_setup.js
 
 
 echo ### Starting MailDev

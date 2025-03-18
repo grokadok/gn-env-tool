@@ -42,13 +42,22 @@ Cet environnement de développement pour GrandNode offre :
     - Détails MongoDB
     - Détails du dépôt Git
     - Chemins GrandNode
+    - Identifiants souhaités pour l'utilisateur et l'administrateur GrandNode
+    - Configuration des boutiques GrandNode (attention au(x) port(s) utilisé(s), définissez celui utilisé par l'IDE, par exemple 5001 pour Rider sur macOS)
 
     ### Variables d'Environnement
 
     | Variable                 | Description                          | Exemple                                  |
     | ------------------------ | ------------------------------------ | ---------------------------------------- |
-    | `GN_ADMIN_USER`          | Nom d'utilisateur admin GrandNode    | admin                                    |
+    | `GN_USER_USERNAME`       | Nom utilisateur GrandNode            | user                                     |
+    | `GN_USER_EMAIL`          | Email utilisateur GrandNode          | user@example.com                         |
+    | `GN_PASSWORD`            | Mot de passe utilisateur GrandNode   | password                                 |
+    | `GN_ADMIN_USERNAME`      | Nom d'utilisateur admin GrandNode    | admin                                    |
+    | `GN_ADMIN_EMAIL`         | Email admin GrandNode                | admin@example.com                        |
     | `GN_ADMIN_PASSWORD`      | Mot de passe admin GrandNode         | password                                 |
+    | `GN_STORES_NAMES`        | Noms des boutiques                   | boutique_1,boutique_2                    |
+    | `GN_STORES_HOSTS`        | Domaines des boutiques               | boutique1.com,boutique2.com              |
+    | `GN_STORES_PORTS`        | Ports des boutiques (optionnels)     | 5001,5002                                |
     | `MONGO_USER`             | Nom d'utilisateur MongoDB            | user                                     |
     | `MONGO_PASSWORD`         | Mot de passe MongoDB                 | password                                 |
     | `MONGO_HOST`             | Nom d'hôte du serveur MongoDB        | localhost                                |

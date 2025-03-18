@@ -33,7 +33,7 @@ db.Customer.insertOne({
     CustomerGuid: UUID(), // Generates a unique identifier
     CustomerTags: [],
     Deleted: false,
-    Email: "devadmin@example.com", // Example email - update for your environment
+    Email: "devadmin@example.com",
     FailedLoginAttempts: 0,
     FreeShipping: false,
     // Admin user groups - these IDs represent Admin, Forum Moderators, and Registered
@@ -75,40 +75,58 @@ db.Customer.insertOne({
 
 // Configure email settings
 // This sets up the email system to use a local SMTP server (like MailDev)
+
+// Remove all the existing EmailAccounts
+db.EmailAccount.deleteMany({});
+
+// Insert the new email account
 const emailAccountId = ObjectId().toString();
 db.EmailAccount.insertOne({
     _id: emailAccountId,
-    DisplayName: "GrandNode Test Mailer", // Example display name
-    Email: "noreply@example.com", // Example email address
-    Host: "localhost", // Local SMTP server host
-    Port: 1025, // Default MailDev SMTP port (use process.env.MAILDEV_SMTP_PORT in real setup)
-    Username: "user", // Example username (use process.env.MAILDEV_INCOMING_USER in real setup)
-    Password: "pass", // Example password (use process.env.MAILDEV_INCOMING_PASS in real setup)
+    DisplayName: process.env.GIT_REPO_NAME + " mailer",
+    Email: "noreply@example.com",
+    Host: "localhost",
+    Port: parseInt(process.env.MAILDEV_SMTP_PORT),
+    Username: process.env.MAILDEV_INCOMING_USER,
+    Password: process.env.MAILDEV_INCOMING_PASS,
     UseServerCertificateValidation: false,
-    SecureSocketOptionsId: 0, // No SSL
+    SecureSocketOptionsId: 0,
     UserFields: [],
 });
 
-// Set the newly created email account as the default
 db.Setting.updateOne(
     { Name: "emailaccountsettings" },
     { $set: { Metadata: '{"DefaultEmailAccountId":"' + emailAccountId + '"}' } }
 );
 
+// Update all message templates to use the newly created email account
+db.MessageTemplate.updateMany({}, { $set: { EmailAccountId: emailAccountId } });
+
 // Additional examples of other possible configurations:
 
 // Example: Update store information
 /*
-db.Store.updateOne(
-    { _id: "YOUR_STORE_ID" },
-    { 
-        $set: { 
-            Name: "Example Store",
-            Url: "http://localhost:4000",
-            SslEnabled: false
-        } 
-    }
-);
+// for each GN_STORES_HOSTS, update the store with the corresponding host
+if (process.env.GN_STORES_HOSTS)
+    process.env.GN_STORES_HOSTS.split(",").forEach((host, index) => {
+        const trimmedHost = host.trim(),
+            port = process.env.GN_STORES_PORTS
+                ? ":" + process.env.GN_STORES_PORTS.split(",")[index].trim()
+                : [],
+            storeName = process.env.GN_STORES_NAMES.split(",")[index].trim();
+
+        db.Store.updateOne(
+            { Name: storeName },
+            {
+                $set: {
+                    SecureUrl: "https://" + trimmedHost + port,
+                    Url: "https://" + trimmedHost + port,
+                    "Domains.0.HostName": trimmedHost,
+                    "Domains.0.Url": "https://" + trimmedHost + port,
+                },
+            }
+        );
+    });
 */
 
 // Example: Set default currency
