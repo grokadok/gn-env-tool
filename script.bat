@@ -76,31 +76,6 @@ for /f "tokens=*" %%a in (.env) do (
     )
 )
 
-echo ### Print required environment variables
-echo GIT_REPO=%GIT_REPO%
-echo GIT_REPO_NAME=%GIT_REPO_NAME%
-echo GIT_WORKING_COMMIT=%GIT_WORKING_COMMIT%
-echo GN_ADMIN_EMAIL=%GN_ADMIN_EMAIL%
-echo GN_ADMIN_PASSWORD=%GN_ADMIN_PASSWORD%
-echo GN_ADMIN_USERNAME=%GN_ADMIN_USERNAME%
-echo GN_USER_EMAIL=%GN_USER_EMAIL%
-echo GN_USER_PASSWORD=%GN_USER_PASSWORD%
-echo GN_USER_USERNAME=%GN_USER_USERNAME%
-echo GN_STORES_NAMES=%GN_STORES_NAMES%
-echo GN_STORES_HOSTS=%GN_STORES_HOSTS%
-echo GN_STORES_PORTS=%GN_STORES_PORTS%
-echo GRANDNODE_PROJECT_PATH=%GRANDNODE_PROJECT_PATH%
-echo GRANDNODE_WEB_PATH=%GRANDNODE_WEB_PATH%
-echo MAILDEV_SMTP_PORT=%MAILDEV_SMTP_PORT%
-echo MAILDEV_WEB_PORT=%MAILDEV_WEB_PORT%
-echo MAILDEV_INCOMING_USER=%MAILDEV_INCOMING_USER%
-echo MAILDEV_INCOMING_PASS=%MAILDEV_INCOMING_PASS%
-echo MONGO_DB=%MONGO_DB%
-echo MONGO_USER=%MONGO_USER%
-echo MONGO_PASSWORD=%MONGO_PASSWORD%
-echo MONGO_HOST=%MONGO_HOST%
-echo MONGO_PORT=%MONGO_PORT%
-
 if not exist .\mongodb\dumps\%MONGO_DB% if not exist .\mongodb\dumps\%MONGO_DB%.archive (
     echo ### Missing MongoDB dump
     exit /b 1
@@ -158,109 +133,99 @@ for /f %%i in ('docker ps -q --filter ancestor^=maildev/maildev') do (
 )
 
 echo ### Parsing the command line arguments
-
-set CLONE_FLAG=0
-set MASK_FLAG=0
-
 for %%a in (%*) do (
-    if "%%a"=="--clone" set CLONE_FLAG=1
-    if "%%a"=="--mask" set MASK_FLAG=1
-)
+    if "%%a"=="--clone" (
+        echo ### Cleaning up the workspace
+        if exist .\solution\%GIT_REPO_NAME% rmdir /S /Q .\solution\%GIT_REPO_NAME%
 
-if %CLONE_FLAG%==1 (
-    echo ### Cleaning up the workspace
-    if exist .\solution\%GIT_REPO_NAME% rmdir /S /Q .\solution\%GIT_REPO_NAME%
+        echo ### Cloning GrandNode repository
 
-    echo ### Cloning GrandNode repository
-
-    git clone --recurse-submodules %GIT_REPO%/%GIT_REPO_NAME% .\solution\%GIT_REPO_NAME%
-    if %ERRORLEVEL% neq 0 (
-        if not defined GIT_WORKING_COMMIT (
-            echo ### Clone failed and no working commit provided
-            exit /b 1
-        )
-        echo ### Clone failed, cleaning up the workspace
-        rmdir /S /Q .\solution\%GIT_REPO_NAME%
-        echo ### Cloning GrandNode repository with the last working commit
-        git clone %GIT_REPO%/%GIT_REPO_NAME% .\solution\%GIT_REPO_NAME%
+        git clone --recurse-submodules %GIT_REPO%/%GIT_REPO_NAME% .\solution\%GIT_REPO_NAME%
         if %ERRORLEVEL% neq 0 (
-            echo ### Clone failed
-            exit /b 1
+            if not defined GIT_WORKING_COMMIT (
+                echo ### Clone failed and no working commit provided
+                exit /b 1
+            )
+            echo ### Clone failed, cleaning up the workspace
+            rmdir /S /Q .\solution\%GIT_REPO_NAME%
+            echo ### Cloning GrandNode repository with the last working commit
+            git clone %GIT_REPO%/%GIT_REPO_NAME% .\solution\%GIT_REPO_NAME%
+            if %ERRORLEVEL% neq 0 (
+                echo ### Clone failed
+                exit /b 1
+            )
+            echo ### Checking out to the target commit
+            cd .\solution\%GIT_REPO_NAME%
+            git checkout %GIT_WORKING_COMMIT%
+            echo ### Initializing and updating submodules
+            git submodule init
+            git submodule update
+            cd ..\..
         )
-        echo ### Checking out to the target commit
-        cd .\solution\%GIT_REPO_NAME%
-        git checkout %GIT_WORKING_COMMIT%
-        echo ### Initializing and updating submodules
-        git submodule init
-        git submodule update
-        cd ..\..
-    )
 
-    echo ### Building GrandNode
-    
-    dotnet build .\solution\%GIT_REPO_NAME%\%GRANDNODE_PROJECT_PATH% || (
-        if defined GIT_WORKING_COMMIT (
-            set /p RETRY_WITH_COMMIT="### Build failed. Do you want to retry with the working commit %GIT_WORKING_COMMIT%? (y/n) "
-            if /i "!RETRY_WITH_COMMIT!"=="y" (
-                rmdir /S /Q .\solution\%GIT_REPO_NAME%
-                echo ### Cloning GrandNode repository with the last working commit
-                git clone %GIT_REPO%/%GIT_REPO_NAME% .\solution\%GIT_REPO_NAME%
-                if %ERRORLEVEL% neq 0 (
-                    echo ### Clone failed
-                    exit /b 1
-                )
-                echo ### Checking out to the working commit
-                cd .\solution\%GIT_REPO_NAME%
-                git checkout %GIT_WORKING_COMMIT%
-                echo ### Initializing and updating submodules
-                git submodule init
-                git submodule update
-                
-                cd ..\..
-                echo ### Building GrandNode with working commit
-                dotnet build .\solution\%GIT_REPO_NAME%\%GRANDNODE_PROJECT_PATH% || (
-                    echo ### Build failed even with working commit
+        echo ### Building GrandNode
+        
+        dotnet build .\solution\%GIT_REPO_NAME%\%GRANDNODE_PROJECT_PATH% || (
+            if defined GIT_WORKING_COMMIT (
+                set /p RETRY_WITH_COMMIT="### Build failed. Do you want to retry with the working commit %GIT_WORKING_COMMIT%? (y/n) "
+                if /i "!RETRY_WITH_COMMIT!"=="y" (
+                    rmdir /S /Q .\solution\%GIT_REPO_NAME%
+                    echo ### Cloning GrandNode repository with the last working commit
+                    git clone %GIT_REPO%/%GIT_REPO_NAME% .\solution\%GIT_REPO_NAME%
+                    if %ERRORLEVEL% neq 0 (
+                        echo ### Clone failed
+                        exit /b 1
+                    )
+                    echo ### Checking out to the working commit
+                    cd .\solution\%GIT_REPO_NAME%
+                    git checkout %GIT_WORKING_COMMIT%
+                    echo ### Initializing and updating submodules
+                    git submodule init
+                    git submodule update
+                    
+                    cd ..\..
+                    echo ### Building GrandNode with working commit
+                    dotnet build .\solution\%GIT_REPO_NAME%\%GRANDNODE_PROJECT_PATH% || (
+                        echo ### Build failed even with working commit
+                        exit /b 1
+                    )
+                ) else (
+                    echo ### Build failed
                     exit /b 1
                 )
             ) else (
                 echo ### Build failed
                 exit /b 1
             )
-        ) else (
-            echo ### Build failed
-            exit /b 1
         )
-    )
 
-    echo ### Installing GrandNode dependencies
-    pushd .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%
-    npm install
-    popd
+        echo ### Installing GrandNode dependencies
+        pushd .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%
+        call npm install
+        popd
 
-    echo ### Copying configuration files
-    move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg.bak
-    move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg.bak
-    move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json.bak
-    move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs.bak
-    copy .\assets\data\InstalledPlugins.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg
-    copy .\assets\data\Settings.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg
-    copy .\assets\data\appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json
-    copy .\assets\data\Program.cs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs
-    echo ### Copying image assets
-    call xcopy /E /Y .\assets\images\uploaded .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\wwwroot\assets\images\uploaded\ || (
-        echo ### Failed to copy uploaded images, skipping...
-    )
-    call xcopy /E /Y .\assets\images\thumbs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\wwwroot\assets\images\thumbs\ || (
-        echo ### Failed to copy thumbnail images, skipping...
-    )
-    echo ### Image assets copied successfully
-)
+        echo ### Copying configuration files
+        move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg.bak
+        move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg.bak
+        move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json.bak
+        move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs.bak
+        copy .\assets\data\InstalledPlugins.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg
+        copy .\assets\data\Settings.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg
+        copy .\assets\data\appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json
+        copy .\assets\data\Program.cs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs
 
-if %MASK_FLAG%==1 (
-    echo ### Masking MongoDB data
-    if exist .\mongodb\data rmdir /S /Q .\mongodb\data
-    cd .\mongodb\mask && docker compose up && docker compose down
-    cd ..\..
+        :: Copy image assets if they exist
+        if exist .\assets\images\uploaded (
+            echo ### Copying image assets
+            xcopy /E /Y .\assets\images\uploaded\* .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\wwwroot\assets\images\uploaded\
+            xcopy /E /Y .\assets\images\thumbs\* .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\wwwroot\assets\images\thumbs\
+        )
+    ) else if "%%a"=="--mask" (
+        echo ### Masking MongoDB data
+        if exist .\mongodb\data rmdir /S /Q .\mongodb\data
+        cd .\mongodb\mask && docker compose up && docker compose down
+        cd ..\..
+    )
 )
 
 echo ### Starting MongoDB
