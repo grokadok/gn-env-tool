@@ -208,10 +208,12 @@ for %%a in (%*) do (
         move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg.bak
         move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg.bak
         move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json.bak
+        move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Properties\launchSettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Properties\launchSettings.json.bak
         move .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs.bak
         copy .\assets\data\InstalledPlugins.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\InstalledPlugins.cfg
         copy .\assets\data\Settings.cfg .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\Settings.cfg
-        copy .\assets\data\appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json
+        copy .\assets\data\windows_appsettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\App_Data\appsettings.json
+        copy .\assets\data\launchSettings.json .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Properties\launchSettings.json
         copy .\assets\data\Program.cs .\solution\%GIT_REPO_NAME%\%GRANDNODE_WEB_PATH%\Program.cs
 
         :: Copy image assets if they exist

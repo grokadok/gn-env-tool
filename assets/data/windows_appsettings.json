@@ -1,7 +1,7 @@
 {
     "SSO": {
-        //The main domain (i.e. ".example.com"), the cookie will be available on all subdomains
-        "CookieDomain": ".localhost"
+        //The main domain (i.e. "integration.acces-culture.neva-one.fr")
+        "CookieDomain": ".grandnode.local"
     },
     "Application": {
         //Enable if you want to see the full error in production environment. It's ignored (always enabled) in development environment
